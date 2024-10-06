@@ -58,12 +58,12 @@ bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl set +5%
 bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 5%-
 
 # personal bindings settings
-bindsym $mod+b exec firefox
+bindsym $mod+b exec brave
 bindsym $mod+Shift+e exec pcmanfm
 bindsym $mod+Shift+o exec "i3lock -i ~/Pictures/wallpapers/nice-blue-background.png"
 gaps inner 10
-gaps outer 0
-smart_gaps on
+gaps outer 10
+#smart_gaps on
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
