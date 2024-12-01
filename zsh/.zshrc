@@ -5,10 +5,6 @@ HISTSIZE=10000000
 SAVEHIST=10000000
 HISTFILE=~/.zhistory
 
-# Use modern completion system
-autoload -Uz compinit
-compinit
-
 . "$HOME/.asdf/asdf.sh"
 
 eval "$(oh-my-posh init zsh --config ~/.config/ohmyposh/themes/catppuccin_mocha.omp.json)"
@@ -36,3 +32,7 @@ alias changemac='sudo ifconfig wlp0s20f3 down && sudo macchanger -r wlp0s20f3 &&
 alias ipw='ip addr show wlp0s20f3'
 alias phone='scrcpy -GS --power-off-on-close'
 alias sysls='systemctl list-units --type=service --all | grep '
+
+# Use modern completion system
+autoload -Uz compinit
+compinit
