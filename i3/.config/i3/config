@@ -60,9 +60,9 @@ bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 5%-
 
 # personal bindings settings
 bindsym $mod+b exec brave
-bindsym $mod+Shift+e exec pcmanfm
+bindsym $mod+e exec thunar
 # bindsym $mod+Shift+o exec "i3lock -i ~/Pictures/wallpapers/nice-blue-background.png"
-bindsym $mod+Shift+o exec "i3lock -i ~/Pictures/wallpapers/landscapes/salty_mountains.png"
+bindsym $mod+z exec "i3lock -i ~/Pictures/wallpapers/landscapes/salty_mountains.png"
 gaps inner 10
 gaps outer 10
 #smart_gaps on
@@ -74,7 +74,7 @@ floating_modifier $mod
 bindsym $mod+Return exec kitty
 
 # kill focused window
-bindsym $mod+Shift+q kill
+bindsym $mod+c kill
 
 # start rofi (a program launcher)
 bindsym $mod+space exec --no-startup-id rofi -show drun
@@ -110,7 +110,7 @@ bindsym $mod+f fullscreen toggle
 # change container layout (stacked, tabbed, toggle split)
 bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
-bindsym $mod+e layout toggle split
+bindsym $mod+t layout toggle split
 
 # toggle tiling / floating
 bindsym $mod+Shift+space floating toggle

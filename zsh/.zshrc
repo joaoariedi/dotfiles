@@ -32,7 +32,13 @@ alias changemac='sudo ifconfig wlp0s20f3 down && sudo macchanger -r wlp0s20f3 &&
 alias ipw='ip addr show wlp0s20f3'
 alias phone='scrcpy -GS --power-off-on-close'
 alias sysls='systemctl list-units --type=service --all | grep '
+alias shared-on="sudo mount 100.114.90.6:/home/ariedi/shared ~/Shared"
+alias shared-off="sudo umount ~/Shared"
+alias compress="gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dNOPAUSE -dQUIET -dBATCH"
+alias sd='shutdown now'
+alias gf='git fetch --all'
 
 # Use modern completion system
 autoload -Uz compinit
 compinit
+
