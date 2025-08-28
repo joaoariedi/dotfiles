@@ -1,0 +1,349 @@
+---
+- name: Configure Manjaro i3WM with dotfiles and essential tools
+  hosts: localhost
+  connection: local
+  become: yes
+  vars:
+    user_name: "{{ ansible_user_id }}"
+    user_home: "{{ ansible_env.HOME }}"
+    dotfiles_repo: "https://github.com/joaoariedi/dotfiles.git"
+    dotfiles_dir: "{{ user_home }}/dotfiles"
+
+  tasks:
+    - name: Update system packages
+      pacman:
+        update_cache: yes
+        upgrade: yes
+
+    - name: Install base development tools
+      pacman:
+        name:
+          - base-devel
+          - git
+          - curl
+          - wget
+          - unzip
+          - stow
+        state: present
+
+    - name: Install i3 desktop environment packages
+      pacman:
+        name:
+          - i3-wm
+          - i3status
+          - i3lock
+          - dmenu
+          - xorg-server
+          - xorg-xinit
+          - xorg-xrandr
+          - xorg-xset
+          - xorg-xsetroot
+          - lightdm
+          - lightdm-gtk-greeter
+        state: present
+
+    - name: Install terminal emulators and shell tools
+      pacman:
+        name:
+          - alacritty
+          - kitty
+          - zsh
+          - tmux
+          - zsh-autosuggestions
+          - zsh-syntax-highlighting
+        state: present
+
+    - name: Install desktop utilities
+      pacman:
+        name:
+          - polybar
+          - rofi
+          - picom
+          - feh
+          - flameshot
+          - thunar
+          - thunar-volman
+          - thunar-archive-plugin
+          - file-roller
+        state: present
+
+    - name: Install development tools
+      pacman:
+        name:
+          - neovim
+          - python
+          - python-pip
+          - nodejs
+          - npm
+          - docker
+          - docker-compose
+        state: present
+
+    - name: Install fonts
+      pacman:
+        name:
+          - noto-fonts
+          - noto-fonts-emoji
+          - ttf-dejavu
+          - ttf-liberation
+          - ttf-opensans
+        state: present
+
+    - name: Install network and system tools
+      pacman:
+        name:
+          - networkmanager
+          - network-manager-applet
+          - bluez
+          - bluez-utils
+          - pulseaudio
+          - pulseaudio-bluetooth
+          - pavucontrol
+          - brightnessctl
+          - acpi
+          - lm_sensors
+        state: present
+
+    - name: Install media and utility packages
+      pacman:
+        name:
+          - firefox
+          - vlc
+          - gimp
+          - libreoffice-still
+          - htop
+          - neofetch
+          - tree
+          - ripgrep
+          - fd
+          - bat
+          - exa
+          - zoxide
+        state: present
+
+    - name: Enable and start essential services
+      systemd:
+        name: "{{ item }}"
+        enabled: yes
+        state: started
+      loop:
+        - NetworkManager
+        - bluetooth
+        - lightdm
+
+    - name: Enable docker service
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
+
+    - name: Add user to docker group
+      user:
+        name: "{{ user_name }}"
+        groups: docker
+        append: yes
+
+    - name: Install yay AUR helper
+      become: no
+      shell: |
+        if ! command -v yay &> /dev/null; then
+          cd /tmp
+          git clone https://aur.archlinux.org/yay.git
+          cd yay
+          makepkg -si --noconfirm
+          cd ~
+          rm -rf /tmp/yay
+        fi
+      args:
+        executable: /bin/bash
+
+    - name: Install AUR packages
+      become: no
+      shell: yay -S --noconfirm {{ item }}
+      loop:
+        - starship
+        - zellij
+        - direnv
+        - asdf-vm
+        - brave-bin
+        - visual-studio-code-bin
+        - discord
+        - spotify
+        - flameshot
+        - tailscale
+
+    - name: Enable and start tailscale
+      systemd:
+        name: tailscale
+        enabled: yes
+        state: started
+
+    - name: Clone dotfiles repository
+      become: no
+      git:
+        repo: "{{ dotfiles_repo }}"
+        dest: "{{ dotfiles_dir }}"
+        update: yes
+
+    - name: Install MesloLGS Nerd Font
+      become: no
+      shell: |
+        FONT_DIR="{{ user_home }}/.local/share/fonts"
+        mkdir -p "$FONT_DIR"
+        cd /tmp
+        if [ ! -f "$FONT_DIR/MesloLGS NF Regular.ttf" ]; then
+          curl -fLo "MesloLGS NF Regular.ttf" https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf
+          curl -fLo "MesloLGS NF Bold.ttf" https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf
+          curl -fLo "MesloLGS NF Italic.ttf" https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf
+          curl -fLo "MesloLGS NF Bold Italic.ttf" https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf
+          mv *.ttf "$FONT_DIR/"
+          fc-cache -fv
+        fi
+      args:
+        executable: /bin/bash
+
+    - name: Stow dotfiles configurations
+      become: no
+      shell: |
+        cd {{ dotfiles_dir }}
+        stow alacritty i3 nvim polybar rofi starship tmux zsh zellij picom direnv kitty
+      args:
+        executable: /bin/bash
+
+    - name: Change default shell to zsh
+      user:
+        name: "{{ user_name }}"
+        shell: /bin/zsh
+
+    - name: Install ASDF plugins and tools
+      become: no
+      shell: |
+        source ~/.asdf/asdf.sh
+        asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git || true
+        asdf plugin add python https://github.com/asdf-community/asdf-python.git || true
+        asdf install nodejs latest
+        asdf install python latest
+        asdf global nodejs latest
+        asdf global python latest
+      args:
+        executable: /bin/bash
+
+    - name: Install LazyVim for Neovim
+      become: no
+      shell: |
+        # Backup existing nvim config if it exists
+        if [ -d "{{ user_home }}/.config/nvim" ]; then
+          mv {{ user_home }}/.config/nvim {{ user_home }}/.config/nvim.bak
+        fi
+        # LazyVim will be installed via the stowed dotfiles
+        echo "LazyVim will auto-install on first nvim launch"
+      args:
+        executable: /bin/bash
+
+    - name: Configure i3 to start on login
+      become: no
+      copy:
+        content: |
+          #!/bin/sh
+          exec i3
+        dest: "{{ user_home }}/.xinitrc"
+        mode: '0755'
+
+    - name: Create user systemd directory
+      become: no
+      file:
+        path: "{{ user_home }}/.config/systemd/user"
+        state: directory
+        mode: '0755'
+
+    - name: Configure polybar as user service
+      become: no
+      copy:
+        content: |
+          [Unit]
+          Description=Polybar
+          After=graphical-session.target
+
+          [Service]
+          Type=forking
+          ExecStart={{ user_home }}/.config/polybar/launch.sh
+          Restart=on-failure
+
+          [Install]
+          WantedBy=graphical-session.target
+        dest: "{{ user_home }}/.config/systemd/user/polybar.service"
+
+    - name: Enable user services
+      become: no
+      systemd:
+        name: "{{ item }}"
+        enabled: yes
+        scope: user
+      loop:
+        - polybar
+
+    - name: Set up keyboard layout and display settings
+      become: no
+      shell: |
+        # Set keyboard layout (adjust as needed)
+        setxkbmap us
+        
+        # Configure displays if needed (example for dual monitor)
+        # xrandr --output HDMI-1 --right-of eDP-1 --auto
+        
+        echo "Display and keyboard configuration completed"
+      args:
+        executable: /bin/bash
+
+    - name: Create useful aliases and functions
+      become: no
+      blockinfile:
+        path: "{{ user_home }}/.zshrc"
+        marker: "# {mark} ANSIBLE MANAGED BLOCK - Additional aliases"
+        block: |
+          # Additional system aliases
+          alias ll='exa -la'
+          alias la='exa -la'
+          alias l='exa -l'
+          alias grep='rg'
+          alias find='fd'
+          alias cat='bat'
+          alias top='htop'
+          
+          # Git aliases
+          alias g='git'
+          alias gs='git status'
+          alias ga='git add'
+          alias gc='git commit'
+          alias gp='git push'
+          alias gl='git pull'
+          alias gd='git diff'
+          alias gb='git branch'
+          alias gco='git checkout'
+          
+          # Docker aliases
+          alias d='docker'
+          alias dc='docker-compose'
+          alias dps='docker ps'
+          alias di='docker images'
+
+    - name: Final system configuration
+      debug:
+        msg: |
+          Manjaro i3WM setup completed successfully!
+          
+          Next steps:
+          1. Reboot your system
+          2. Login and select i3 as your window manager
+          3. Launch neovim to complete LazyVim installation: nvim
+          4. Configure Tailscale: sudo tailscale up
+          5. Test your dotfiles configuration
+          
+          Installed tools:
+          - Desktop: i3wm, polybar, rofi, picom
+          - Terminals: alacritty, kitty with zsh and starship prompt
+          - Development: neovim (LazyVim), docker, nodejs, python
+          - Utilities: brave browser, VS Code, discord, spotify
+          - Fonts: MesloLGS Nerd Font installed
+          
+          Your dotfiles have been stowed and configured automatically!
