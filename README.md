@@ -14,8 +14,7 @@ A comprehensive dotfiles repository featuring a cohesive Catppuccin-themed Linux
 - **Kitty** - Primary terminal (Catppuccin Macchiato theme, 85% opacity)
 - **Alacritty** - Secondary terminal (Catppuccin Mocha theme, 90% opacity)
 - **Zsh** - Shell with extensive aliases and modern tool integration
-- **Oh My Posh** - Primary prompt (Catppuccin Mocha theme)
-- **Starship** - Alternative prompt with comprehensive language support
+- **Starship** - Cross-platform prompt with comprehensive language support and Catppuccin Mocha theme
 
 ### Development Environment
 - **Neovim** - LazyVim distribution v8 with 40+ plugins
@@ -53,7 +52,6 @@ dotfiles/
 ├── kitty/        → ~/.config/kitty/ & ~/.kitty/
 ├── neofetch/     → ~/.config/neofetch/
 ├── nvim/         → ~/.config/nvim/
-├── ohmyposh/     → ~/.config/ohmyposh/
 ├── picom/        → ~/.config/picom/
 ├── polybar/      → ~/.config/polybar/
 ├── rofi/         → ~/.config/rofi/
@@ -74,7 +72,7 @@ Install GNU Stow and the required applications:
 sudo pacman -S stow i3-wm polybar rofi picom kitty alacritty zsh tmux neovim
 
 # Additional tools
-yay -S oh-my-posh starship zellij direnv asdf-vm
+yay -S starship zellij direnv asdf-vm
 ```
 
 ### Stow Configuration
@@ -88,7 +86,7 @@ yay -S oh-my-posh starship zellij direnv asdf-vm
 
 2. **Install all configurations:**
    ```bash
-   stow alacritty i3 nvim polybar rofi starship tmux zsh zellij picom direnv ohmyposh kitty
+   stow alacritty i3 nvim polybar rofi starship tmux zsh zellij picom direnv kitty
    ```
 
 3. **Or install selectively:**

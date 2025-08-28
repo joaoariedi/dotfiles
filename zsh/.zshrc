@@ -10,8 +10,7 @@ HISTFILE=~/.zhistory
 # Add Heroku CLI to PATH
 export PATH="$HOME/.asdf/installs/nodejs/23.6.0/bin:$PATH"
 
-eval "$(oh-my-posh init zsh --config ~/.config/ohmyposh/themes/catppuccin_mocha.omp.json)"
-# eval "$(oh-my-posh init zsh --config 'https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/catppuccin_mocha.omp.json')"
+eval "$(starship init zsh)"
 eval "$(direnv hook zsh)"
 eval "$(zoxide init --cmd cd zsh)"
 
