@@ -7,6 +7,9 @@ HISTFILE=~/.zhistory
 
 . "$HOME/.asdf/asdf.sh"
 
+# Add Heroku CLI to PATH
+export PATH="$HOME/.asdf/installs/nodejs/23.6.0/bin:$PATH"
+
 eval "$(oh-my-posh init zsh --config ~/.config/ohmyposh/themes/catppuccin_mocha.omp.json)"
 # eval "$(oh-my-posh init zsh --config 'https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/catppuccin_mocha.omp.json')"
 eval "$(direnv hook zsh)"
@@ -15,6 +18,9 @@ eval "$(zoxide init --cmd cd zsh)"
 source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source ~/.zsh/catppuccin_frappe-zsh-syntax-highlighting.zsh
+
+# Claude settings
+export CLAUDE_CODE_OAUTH_TOKEN="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"
 
 alias exa="exa --icons -lh --group-directories-first"
 alias exaa="exa -a"
