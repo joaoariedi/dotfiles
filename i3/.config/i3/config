@@ -15,8 +15,8 @@ set $mod Mod4
 # set $mod Mod1
 
 exec --no-startup-id picom
-exec --no-startup-id feh --bg-fill ~/Pictures/wallpapers/landscapes/salty_mountains.png
-# exec --no-startup-id feh --bg-fill ~/Pictures/wallpapers/nice-blue-background.png
+# Display setup and wallpapers are handled by the smart display setup script
+exec_always --no-startup-id ~/.screenlayout/smart-display-setup.sh
 exec --no-startup-id xrdb -merge ~/.Xresources
 exec_always --no-startup-id setxkbmap -option ctrl:nocaps
 
@@ -25,6 +25,16 @@ exec_always killall polybar
 exec_always --no-startup-id ~/.config/polybar/launch_polybar.sh
 
 bindsym Print exec flameshot gui
+
+# Display management keybindings
+bindsym $mod+Shift+d exec ~/.screenlayout/smart-display-setup.sh
+bindsym $mod+Shift+w exec ~/.screenlayout/set-wallpapers.sh
+
+# Quick access to different display configurations
+bindsym $mod+Shift+F1 exec ~/.screenlayout/samsung.sh
+bindsym $mod+Shift+F2 exec ~/.screenlayout/lg.sh
+bindsym $mod+Shift+F3 exec ~/.screenlayout/arand.sh
+bindsym $mod+Shift+F4 exec ~/.screenlayout/external-workspace-setup.sh
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
