@@ -36,8 +36,8 @@ if [ -n "$EXTERNAL_OUTPUT" ]; then
     # Wait for display setup
     sleep 2
     
-    # Set wallpapers
-    feh --bg-fill "$WALLPAPER_PATH" &
+    # Set wallpapers using the wallpaper script
+    ~/.screenlayout/set-wallpapers.sh &
     
     # Move workspace 1 to external monitor
     i3-msg "workspace 1; move workspace to output $EXTERNAL_OUTPUT" &
@@ -58,8 +58,8 @@ else
         xrandr --output "$output" --off 2>/dev/null || true
     done
     
-    # Set wallpaper
-    feh --bg-fill "$WALLPAPER_PATH" &
+    # Set wallpaper using the wallpaper script
+    ~/.screenlayout/set-wallpapers.sh &
     
     echo "$(date): Single monitor setup completed" >> ~/.config/i3/display-setup.log
 fi
