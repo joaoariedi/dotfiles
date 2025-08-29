@@ -1,0 +1,19 @@
+# Display setup configuration for i3
+# This file should be included in your main i3 config
+
+# Automatically run display setup on i3 startup
+exec_always --no-startup-id ~/.screenlayout/smart-display-setup.sh
+
+# Workspace to output assignments (these will be set by the script, but defined here for reference)
+# workspace 1 output HDMI-1 eDP-1
+# workspace 2 output eDP-1 HDMI-1
+
+# Key bindings for display management
+bindsym $mod+Shift+d exec ~/.screenlayout/smart-display-setup.sh
+bindsym $mod+Shift+w exec ~/.screenlayout/set-wallpapers.sh
+
+# Quick access to different display configurations
+bindsym $mod+Shift+F1 exec ~/.screenlayout/samsung.sh  # External only
+bindsym $mod+Shift+F2 exec ~/.screenlayout/lg.sh       # Dual monitor with laptop as primary
+bindsym $mod+Shift+F3 exec ~/.screenlayout/arand.sh    # Dual monitor with external as primary
+bindsym $mod+Shift+F4 exec ~/.screenlayout/external-workspace-setup.sh  # Full setup with workspace assignment
