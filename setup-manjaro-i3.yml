@@ -65,6 +65,9 @@
           - thunar-volman
           - thunar-archive-plugin
           - file-roller
+          - xarchiver
+          - xfburn
+          - nitrogen
         state: present
 
     - name: Install development tools
@@ -75,8 +78,6 @@
           - python-pip
           - nodejs
           - npm
-          - docker
-          - docker-compose
         state: present
 
     - name: Install fonts
@@ -87,6 +88,21 @@
           - ttf-dejavu
           - ttf-liberation
           - ttf-opensans
+          - ttf-fira-code
+          - ttf-hack
+        state: present
+        
+    - name: Install Manjaro-specific packages
+      pacman:
+        name:
+          - manjaro-i3-settings
+          - manjaro-zsh-config
+          - i3status-manjaro
+          - i3exit
+          - i3-scrot
+          - artwork-i3
+          - conky-i3
+          - dmenu-manjaro
         state: present
 
     - name: Install network and system tools
@@ -112,6 +128,7 @@
           - gimp
           - libreoffice-still
           - htop
+          - btop
           - neofetch
           - tree
           - ripgrep
@@ -119,6 +136,7 @@
           - bat
           - exa
           - zoxide
+          - lazygit
         state: present
 
     - name: Enable and start essential services
@@ -131,17 +149,80 @@
         - bluetooth
         - lightdm
 
-    - name: Enable docker service
-      systemd:
-        name: docker
-        enabled: yes
-        state: started
+    - name: Install Docker from official repository
+      become: no
+      shell: |
+        # Install Docker from official Docker repository
+        if ! command -v docker &> /dev/null; then
+          # Install required packages
+          sudo pacman -S --noconfirm curl
+          
+          # Download and install Docker
+          curl -fsSL https://get.docker.com -o get-docker.sh
+          sudo sh get-docker.sh
+          
+          # Clean up
+          rm get-docker.sh
+          
+          # Enable and start Docker service
+          sudo systemctl enable docker
+          sudo systemctl start docker
+        fi
+      args:
+        executable: /bin/bash
+
+    - name: Install Docker Compose from GitHub
+      become: no
+      shell: |
+        # Install Docker Compose v2
+        if ! command -v docker-compose &> /dev/null; then
+          DOCKER_COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -Po '"tag_name": "\K[^"]*')
+          sudo curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+        fi
+      args:
+        executable: /bin/bash
 
     - name: Add user to docker group
       user:
         name: "{{ user_name }}"
         groups: docker
         append: yes
+
+    - name: Install AWS CLI v2
+      become: no
+      shell: |
+        if ! command -v aws &> /dev/null; then
+          cd /tmp
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+          rm -rf aws awscliv2.zip
+        fi
+      args:
+        executable: /bin/bash
+
+    - name: Install Heroku CLI
+      become: no
+      shell: |
+        if ! command -v heroku &> /dev/null; then
+          # Install Heroku CLI via npm (more reliable than snap on Arch)
+          npm install -g heroku
+        fi
+      args:
+        executable: /bin/bash
+
+    - name: Install kubectl
+      become: no
+      shell: |
+        if ! command -v kubectl &> /dev/null; then
+          # Install kubectl from official Kubernetes repository
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+          rm kubectl
+        fi
+      args:
+        executable: /bin/bash
 
     - name: Install yay AUR helper
       become: no
@@ -169,8 +250,9 @@
         - visual-studio-code-bin
         - discord
         - spotify
-        - flameshot
         - tailscale
+        - lazydocker
+        - nerd-fonts-meslo
 
     - name: Enable and start tailscale
       systemd:
@@ -185,20 +267,12 @@
         dest: "{{ dotfiles_dir }}"
         update: yes
 
-    - name: Install MesloLGS Nerd Font
+    - name: Update font cache after AUR font installation
       become: no
       shell: |
-        FONT_DIR="{{ user_home }}/.local/share/fonts"
-        mkdir -p "$FONT_DIR"
-        cd /tmp
-        if [ ! -f "$FONT_DIR/MesloLGS NF Regular.ttf" ]; then
-          curl -fLo "MesloLGS NF Regular.ttf" https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf
-          curl -fLo "MesloLGS NF Bold.ttf" https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf
-          curl -fLo "MesloLGS NF Italic.ttf" https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf
-          curl -fLo "MesloLGS NF Bold Italic.ttf" https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf
-          mv *.ttf "$FONT_DIR/"
-          fc-cache -fv
-        fi
+        # Font cache refresh - Nerd fonts installed via AUR
+        fc-cache -fv
+        echo "Font cache updated"
       args:
         executable: /bin/bash
 
@@ -206,7 +280,10 @@
       become: no
       shell: |
         cd {{ dotfiles_dir }}
-        stow alacritty i3 nvim polybar rofi starship tmux zsh zellij picom direnv kitty
+        # Create necessary directories first
+        mkdir -p ~/.config
+        # Stow all configurations
+        stow alacritty i3 nvim polybar rofi starship tmux zsh zellij picom direnv kitty neofetch
       args:
         executable: /bin/bash
 
@@ -254,6 +331,24 @@
       file:
         path: "{{ user_home }}/.config/systemd/user"
         state: directory
+        mode: '0755'
+
+    - name: Create polybar launch script
+      become: no
+      copy:
+        content: |
+          #!/bin/bash
+          # Terminate already running bar instances
+          killall -q polybar
+          
+          # Wait until the processes have been shut down
+          while pgrep -u $UID -x polybar >/dev/null; do sleep 1; done
+          
+          # Launch polybar
+          polybar main &
+          
+          echo "Polybar launched..."
+        dest: "{{ user_home }}/.config/polybar/launch.sh"
         mode: '0755'
 
     - name: Configure polybar as user service
@@ -326,6 +421,40 @@
           alias dc='docker-compose'
           alias dps='docker ps'
           alias di='docker images'
+          
+          # Kubernetes aliases
+          alias k='kubectl'
+          alias kgp='kubectl get pods'
+          alias kgs='kubectl get services'
+          alias kgd='kubectl get deployments'
+          alias kdp='kubectl describe pod'
+          alias kds='kubectl describe service'
+          alias kdd='kubectl describe deployment'
+          
+          # AWS aliases
+          alias awsprofile='export AWS_PROFILE=$(aws configure list-profiles | fzf)'
+          alias awsregion='export AWS_REGION=$(echo -e "us-east-1\nus-west-2\neus-west-1\nap-southeast-1" | fzf)'
+          
+          # Heroku aliases  
+          alias h='heroku'
+          alias hlog='heroku logs --tail'
+          alias hdyno='heroku ps'
+
+    - name: Configure additional system settings
+      become: no
+      shell: |
+        # Create necessary directories
+        mkdir -p ~/Pictures/Screenshots
+        mkdir -p ~/Pictures/Wallpapers
+        
+        # Copy wallpaper if available
+        if [ -f "{{ dotfiles_dir }}/backgrounds/nice-blue-background.png" ]; then
+          cp "{{ dotfiles_dir }}/backgrounds/nice-blue-background.png" ~/Pictures/Wallpapers/
+        fi
+        
+        echo "Additional system settings configured"
+      args:
+        executable: /bin/bash
 
     - name: Final system configuration
       debug:
@@ -338,12 +467,15 @@
           3. Launch neovim to complete LazyVim installation: nvim
           4. Configure Tailscale: sudo tailscale up
           5. Test your dotfiles configuration
+          6. Start polybar: systemctl --user start polybar
           
           Installed tools:
-          - Desktop: i3wm, polybar, rofi, picom
-          - Terminals: alacritty, kitty with zsh and starship prompt
-          - Development: neovim (LazyVim), docker, nodejs, python
-          - Utilities: brave browser, VS Code, discord, spotify
-          - Fonts: MesloLGS Nerd Font installed
+          - Desktop: i3wm, polybar, rofi, picom, feh, nitrogen
+          - Terminals: alacritty, kitty with zsh and starship prompt  
+          - Development: neovim (LazyVim), docker, nodejs, python, aws-cli, heroku-cli, kubectl
+          - Utilities: brave browser, VS Code, discord, spotify, lazygit, btop
+          - Fonts: MesloLGS Nerd Font via AUR package
+          - Manjaro-specific: i3exit, i3-scrot, manjaro themes and configs
           
           Your dotfiles have been stowed and configured automatically!
+          Polybar service configured and ready to start.

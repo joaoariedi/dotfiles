@@ -35,7 +35,8 @@ This Ansible playbook automatically configures a clean Manjaro installation with
 ### Development Environment
 - **Editor**: Neovim with LazyVim distribution
 - **Version Managers**: ASDF for Node.js and Python
-- **Containers**: Docker and Docker Compose
+- **Containers**: Docker (from official source) and Docker Compose v2
+- **Cloud Tools**: AWS CLI v2, Heroku CLI, kubectl
 - **Environment**: direnv for project-specific configs
 - **CLI Tools**: ripgrep, fd, bat, exa, zoxide, tree, htop
 
@@ -52,7 +53,7 @@ This Ansible playbook automatically configures a clean Manjaro installation with
 - **Bluetooth**: Bluez with audio support
 - **Audio**: PulseAudio with Bluetooth
 - **VPN**: Tailscale
-- **Containers**: Docker service
+- **Containers**: Docker service (from official Docker repository)
 
 ### Fonts
 - **Nerd Font**: MesloLGS (matches your dotfiles)
@@ -101,6 +102,7 @@ This Ansible playbook automatically configures a clean Manjaro installation with
    - Press `$mod+d` to open Rofi launcher
    - Check that Polybar is running at the top
    - Verify Starship prompt is active in terminal
+   - Test new CLI tools: `docker --version`, `aws --version`, `heroku --version`, `kubectl version --client`
 
 ## Customization
 
