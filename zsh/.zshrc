@@ -21,6 +21,10 @@ source ~/.zsh/catppuccin_frappe-zsh-syntax-highlighting.zsh
 # Claude settings
 export CLAUDE_CODE_OAUTH_TOKEN="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"
 
+# Github settings
+# GITHUB_TOKEN is loaded from ~/.github_token if it exists
+[ -f ~/.github_token ] && export GITHUB_TOKEN=$(cat ~/.github_token)
+
 alias exa="exa --icons -lh --group-directories-first"
 alias exaa="exa -a"
 alias zj="zellij --config $HOME/.config/zellij/config.kdl"
