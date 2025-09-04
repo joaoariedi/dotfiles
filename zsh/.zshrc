@@ -10,6 +10,24 @@ HISTFILE=~/.zhistory
 # Add Heroku CLI to PATH
 export PATH="$HOME/.asdf/installs/nodejs/23.6.0/bin:$PATH"
 
+# Add Go bin to PATH dynamically (works with asdf version switching)
+# This function updates GOPATH whenever you change Go versions with asdf
+asdf_update_golang_env() {
+  local go_bin_path="$(asdf which go 2>/dev/null)"
+  if [ -n "$go_bin_path" ]; then
+    export GOROOT="$(dirname $(dirname $go_bin_path))"
+    export GOPATH="$(go env GOPATH 2>/dev/null)"
+    export PATH="${GOPATH}/bin:${PATH}"
+  fi
+}
+
+# Initial call
+asdf_update_golang_env
+
+# Hook to update on version change
+autoload -U add-zsh-hook
+add-zsh-hook precmd asdf_update_golang_env
+
 eval "$(starship init zsh)"
 eval "$(direnv hook zsh)"
 eval "$(zoxide init --cmd cd zsh)"
