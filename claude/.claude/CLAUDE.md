@@ -1,25 +1,47 @@
-# AI Development Framework Configuration v2.1
+# AI Development Framework Configuration v3.0 - Agent-Enhanced
 
-## Claude Code Workflow Requirements (18 Steps - Simplified)
+## Agent-Based Workflow Requirements (18 Steps - Automated)
+
+## Agent-Based Workflow Activation
+
+### Primary Agent: framework-orchestrator
+- **Trigger**: Any development task requiring >3 steps
+- **Purpose**: Master coordinator for 18-step workflow
+- **Delegation**: Automatically delegates to specialized agents
+
+### Agent Hierarchy
+1. **framework-orchestrator** (master coordinator)
+2. **context-analyst** (Phase 1: context and project analysis)
+3. **plan-architect** (Phase 1: planning and architecture)
+4. **implementation-engineer** (Phase 2: code implementation)
+5. **test-specialist** (Phase 2: testing and validation)
+6. **quality-guardian** (Phase 2-3: quality assurance)
+7. **review-coordinator** (Phase 3: PR and review management)
+8. **metrics-collector** (Phase 4: metrics and retrospectives)
+
+### Agent Coordination Rules
+- Only framework-orchestrator can initiate TodoWrite workflows
+- Each specialist agent reports back to orchestrator
+- Quality gates must be approved by quality-guardian
+- All phases must be completed in sequence
+- Metrics must be collected by metrics-collector
 
 ### Phase 1: Planning & Context Setup (Steps 1-4)
 
-#### Step 1: Context Preparation
-- Before any implementation, examine the project structure using Glob/Read tools
-- Check for existing `README.md`, `package.json`, `pyproject.toml`, or `Cargo.toml` to understand:
-  - Tech stack and versions
-  - Existing patterns and conventions
-  - Available scripts (test, lint, build)
-- Look for config files: `.eslintrc`, `pyproject.toml`, `.rustfmt.toml`
+#### Step 1: Context Preparation (context-analyst)
+- Automated project structure analysis using Glob/Read tools
+- Auto-detect tech stack from `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`
+- Identify existing patterns, conventions, and quality tools
+- Generate comprehensive project context report
 
-#### Step 2: Create Todo List & Plan
-- **ALWAYS use TodoWrite tool** to create comprehensive task breakdown
-- Include in todos:
+#### Step 2: Create Todo List & Plan (plan-architect)
+- **Automated TodoWrite** creation by framework-orchestrator
+- AI-generated comprehensive task breakdown including:
   - Objective and scope clarity
   - Step-by-step implementation tasks
   - Quality validation steps
   - Testing requirements
-- Use ExitPlanMode tool for complex implementations
+- Uses ExitPlanMode for complex implementations
 
 #### Step 3: Plan Documentation (Optional for Simple Tasks)
 - For complex features (>5 todos), save as `PLAN_<DESCRIPTIVE_NAME>.md`
@@ -39,9 +61,9 @@
   - Look for `.pre-commit-config.yaml`
   - Find lint/format scripts in `package.json` or similar
 - Identify available commands:
-  - Linting: `npm run lint`, `ruff check`, `cargo clippy`
-  - Formatting: `npm run format`, `black .`, `cargo fmt`
-  - Testing: `npm test`, `pytest`, `cargo test`
+  - Linting: `npm run lint`, `ruff check`, `cargo clippy`, `go vet`
+  - Formatting: `npm run format`, `black .`, `cargo fmt`, `go fmt`
+  - Testing: `npm test`, `pytest`, `cargo test`, `go test ./...`
 
 #### Step 6: Branch Creation (Git Projects Only)
 - If in git repo, create feature branches:
@@ -72,12 +94,12 @@
   - Find existing test patterns using Glob: `**/*test*`, `**/spec/**`
   - Follow existing test structure and naming
   - Focus on business logic and edge cases
-- Run test suite if available: `npm test`, `pytest`, `cargo test`
+- Run test suite if available: `npm test`, `pytest`, `cargo test`, `go test ./...`
 
 #### Step 10: Quality Checks
 - **ALWAYS run quality checks after implementation**:
   - Check available scripts in `package.json`, etc.
-  - Run linting: `npm run lint` / `ruff check` / `cargo clippy`
+  - Run linting: `npm run lint` / `ruff check` / `cargo clippy` / `go vet`
   - Run type checking: `npm run typecheck` / `mypy` / `cargo check`
   - Run tests if they exist
 - Fix any issues before considering task complete
@@ -205,12 +227,12 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - Use Glob to discover project structure
 - Use Bash to run quality checks and tests
 
-### Enforcement Triggers
-1. **Before any implementation**: Create todos with TodoWrite
-2. **During implementation**: Mark progress with TodoWrite
-3. **After each file change**: Run relevant quality checks
-4. **Before completion**: Ensure all todos marked completed
-5. **Git projects**: Ask about co-authoring and only commit when requested
+### Agent Enforcement Triggers
+1. **Task received**: framework-orchestrator creates TodoWrite workflow
+2. **Phase transitions**: Agents coordinate through orchestrator
+3. **Quality gates**: quality-guardian validates before progression
+4. **Completion**: metrics-collector records data before closure
+5. **Git integration**: review-coordinator handles commits and PRs
 
 ## Project-Specific Adaptations
 
@@ -229,6 +251,11 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - Common commands: `cargo clippy`, `cargo fmt`, `cargo test`
 - Check for workspace configuration
 
+### Go Projects
+- Look for: `go.mod`, `go.sum`, `Makefile`
+- Common commands: `go vet`, `go test ./...`, `go fmt`
+- Check for module structure and build tools
+
 ### Other Languages
 - Examine project files to understand toolchain
 - Ask user for specific quality commands if unclear
@@ -243,3 +270,29 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 5. **Ask about co-authoring** when creating git commits
 6. **Prefer editing existing files** over creating new ones
 7. **Keep responses concise** and focused on the task at hand
+
+# Agent-Specific Instructions
+
+## framework-orchestrator
+- Always initiate with comprehensive TodoWrite workflow
+- Delegate to appropriate specialists for each phase
+- Coordinate quality gates between agents
+- Generate final reports with metrics integration
+
+## Specialist Agent Rules
+- Report back to framework-orchestrator after task completion
+- Follow framework quality standards (functions <50 lines, etc.)
+- Use semantic commit messages with agent signatures
+- Integrate with existing project patterns and tools
+
+## Quality Standards
+NEVER create files unless absolutely necessary for achieving goals.
+ALWAYS prefer editing existing files over creating new ones.
+NEVER proactively create documentation files unless explicitly requested.
+Maintain all existing framework quality standards through agent automation.
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
